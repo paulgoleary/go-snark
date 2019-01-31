@@ -12,6 +12,61 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func hornerPolyEval(poly []*big.Int, x, m *big.Int) *big.Int {
+
+	res := big.NewInt(0)
+	for i := len(poly) - 1; i >= 0; i-- {
+		res.Mul(res, x)
+		res.Mod(res, m)
+		res.Add(res, poly[i])
+		res.Mod(res, m)
+	}
+
+	return res
+}
+
+func cmpVects(a, b []*big.Int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for x, _ := range a {
+		if a[x].Cmp(b[x]) != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func checkR1CSToQAP(r1csIn [][]*big.Int, qapIn [][]*big.Int, m *big.Int) bool {
+
+	for x, polyR := range r1csIn {
+		res := make([]*big.Int, len(polyR))
+		biX := big.NewInt(int64(x + 1))
+		for y, polyQ := range qapIn {
+			res[y] = hornerPolyEval(polyQ, biX, m)
+		}
+		cmp := cmpVects(res, polyR)
+		if !cmp {
+			return false
+		}
+	}
+	return true
+}
+
+func TestDirectPoly(t *testing.T) {
+
+	testPoly := make([]*big.Int, 4)
+	testPoly[0], _ = new(big.Int).SetString("3", 10)
+	testPoly[1], _ = new(big.Int).SetString("3648040478639879203707734290876212514758060733402672390616367364429301415931", 10)
+	testPoly[2], _ = new(big.Int).SetString("10944121435919637611123202872628637544274182200208017171849102093287904247811", 10)
+	testPoly[3], _ = new(big.Int).SetString("7296080957279758407415468581752425029516121466805344781232734728858602831872", 10)
+
+	testX := big.NewInt(2)
+	testEval := Utils.PF.Eval(testPoly, testX)
+	testEval2 := hornerPolyEval(testPoly, testX, Utils.PF.F.Q)
+	assert.Equal(t, testEval, testEval2)
+}
+
 func TestZkFromFlatCircuitCode(t *testing.T) {
 
 	// compile circuit and get the R1CS
@@ -33,10 +88,10 @@ func TestZkFromFlatCircuitCode(t *testing.T) {
 
 	b3 := big.NewInt(int64(3))
 	inputs := []*big.Int{b3}
-	// wittness
-	w, err := circuit.CalculateWitness(inputs)
+	// witness
+	witness, err := circuit.CalculateWitness(inputs)
 	assert.Nil(t, err)
-	fmt.Println("\nwitness", w)
+	fmt.Println("\nwitness", witness)
 
 	// flat code to R1CS
 	fmt.Println("\ngenerating R1CS from flat code")
@@ -53,7 +108,14 @@ func TestZkFromFlatCircuitCode(t *testing.T) {
 	fmt.Println(betas)
 	fmt.Println(gammas)
 
-	ax, bx, cx, px := Utils.PF.CombinePolynomials(w, alphas, betas, gammas)
+	checkA := checkR1CSToQAP(a, alphas, Utils.PF.F.Q)
+	assert.Equal(t, checkA, a)
+	checkB := checkR1CSToQAP(b, betas, Utils.PF.F.Q)
+	assert.Equal(t, checkB, b)
+	checkC := checkR1CSToQAP(c, gammas, Utils.PF.F.Q)
+	assert.Equal(t, checkC, gammas)
+
+	ax, bx, cx, px := Utils.PF.CombinePolynomials(witness, alphas, betas, gammas)
 
 	hx := Utils.PF.DivisorPolynomial(px, zx)
 
@@ -71,12 +133,12 @@ func TestZkFromFlatCircuitCode(t *testing.T) {
 	assert.Equal(t, rem, r1csqap.ArrayOfBigZeros(4))
 
 	// calculate trusted setup
-	setup, err := GenerateTrustedSetup(len(w), *circuit, alphas, betas, gammas, zx)
+	setup, err := GenerateTrustedSetup(len(witness), *circuit, alphas, betas, gammas, zx)
 	assert.Nil(t, err)
 	fmt.Println("\nt:", setup.Toxic.T)
 
 	// piA = g1 * A(t), piB = g2 * B(t), piC = g1 * C(t), piH = g1 * H(t)
-	proof, err := GenerateProofs(*circuit, setup, hx, w)
+	proof, err := GenerateProofs(*circuit, setup, hx, witness)
 	assert.Nil(t, err)
 
 	fmt.Println("\n proofs:")

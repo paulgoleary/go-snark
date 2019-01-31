@@ -2,6 +2,7 @@ package r1csqap
 
 import (
 	"bytes"
+	"fmt"
 	"math/big"
 
 	"github.com/arnaucube/go-snark/fields"
@@ -121,6 +122,7 @@ func (pf PolynomialField) Eval(v []*big.Int, x *big.Int) *big.Int {
 		xi := pf.F.Exp(x, big.NewInt(int64(i)))
 		elem := pf.F.Mul(v[i], xi)
 		r = pf.F.Add(r, elem)
+		println(fmt.Sprintf("%v", r))
 	}
 	return r
 }
