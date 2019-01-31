@@ -253,7 +253,7 @@ func (F *FP) cmove(b *FP,d int) {
 }
 
 /* this*=b mod Modulus */
-func (F *FP) mul(b *FP) {
+func (F *FP) Mul(b *FP) {
 
 	if int64(F.XES)*int64(b.XES)>int64(FEXCESS) {F.reduce()}
 
@@ -263,7 +263,7 @@ func (F *FP) mul(b *FP) {
 }
 
 /* this = -this mod Modulus */
-func (F *FP) neg() {
+func (F *FP) Neg() {
 	m:=NewBIGints(Modulus)
 	sb:=logb2(uint32(F.XES-1))
 
@@ -294,10 +294,10 @@ func (F *FP) imul(c int) {
 			F.XES*=int32(c)
 		} else {
 			n:=NewFPint(c)
-			F.mul(n)
+			F.Mul(n)
 		}
 	}
-	if s {F.neg(); F.norm()}
+	if s {F.Neg(); F.norm()}
 }
 
 /* this*=this mod Modulus */
@@ -309,22 +309,22 @@ func (F *FP) sqr() {
 }
 
 /* this+=b */
-func (F *FP) add(b *FP) {
+func (F *FP) Add(b *FP) {
 	F.x.add(b.x)
 	F.XES+=b.XES
 	if (F.XES>FEXCESS) {F.reduce()}
 }
 
 /* this-=b */
-func (F *FP) sub(b *FP) {
+func (F *FP) Sub(b *FP) {
 	n:=NewFPcopy(b)
-	n.neg()
-	F.add(n)
+	n.Neg()
+	F.Add(n)
 }
 
 func (F *FP) rsub(b *FP) {
-	F.neg()
-	F.add(b)
+	F.Neg()
+	F.Add(b)
 }
 
 /* this/=2 mod Modulus */
@@ -347,15 +347,15 @@ func (F *FP) fpow() *FP {
 // phase 1
 	xp=append(xp,NewFPcopy(F)); 
 	xp=append(xp,NewFPcopy(F)); xp[1].sqr()
-	xp=append(xp,NewFPcopy(xp[1])); xp[2].mul(F)
+	xp=append(xp,NewFPcopy(xp[1])); xp[2].Mul(F)
 	xp=append(xp,NewFPcopy(xp[2])); xp[3].sqr()
 	xp=append(xp,NewFPcopy(xp[3])); xp[4].sqr()
-	xp=append(xp,NewFPcopy(xp[4])); xp[5].mul(xp[2])
+	xp=append(xp,NewFPcopy(xp[4])); xp[5].Mul(xp[2])
 	xp=append(xp,NewFPcopy(xp[5])); xp[6].sqr()
 	xp=append(xp,NewFPcopy(xp[6])); xp[7].sqr()
 	xp=append(xp,NewFPcopy(xp[7])); xp[8].sqr()
 	xp=append(xp,NewFPcopy(xp[8])); xp[9].sqr()
-	xp=append(xp,NewFPcopy(xp[9])); xp[10].mul(xp[5])
+	xp=append(xp,NewFPcopy(xp[9])); xp[10].Mul(xp[5])
 	var n,c int
 		
 	n=int(MODBITS)
@@ -385,7 +385,7 @@ func (F *FP) fpow() *FP {
 	for k!=0 {
 		i--
 		if ac[i]>k {continue}
-		key.mul(xp[i])
+		key.Mul(xp[i])
 		k-=ac[i] 
 	}
 // phase 2 
@@ -400,7 +400,7 @@ func (F *FP) fpow() *FP {
 		t.copy(xp[j]); j++
 		for i=0;i<m;i++ {t.sqr()} 
 		xp[j].copy(xp[j-1])
-		xp[j].mul(t)
+		xp[j].Mul(t)
 		m*=2
 	}
 	lo:=nw-m
@@ -413,20 +413,20 @@ func (F *FP) fpow() *FP {
 		t.copy(r)
 		for i=0;i<m;i++ {t.sqr()}
 		r.copy(t)
-		r.mul(xp[j])
+		r.Mul(xp[j])
 	}
 // phase 3
 	if bw!=0 {
 		for i=0;i<bw;i++ {r.sqr()}
-		r.mul(key)
+		r.Mul(key)
 	}
 
 	if MODTYPE==GENERALISED_MERSENNE {     // Goldilocks ONLY
 		key.copy(r)
 		r.sqr()
-		r.mul(F)
+		r.Mul(F)
 		for i=0;i<n+1;i++ {r.sqr()}
-		r.mul(key)
+		r.Mul(key)
 	}
 
 	return r
@@ -435,23 +435,23 @@ func (F *FP) fpow() *FP {
 
 
 /* this=1/this mod Modulus */
-func (F *FP) inverse() {
+func (F *FP) Inverse() {
 
 	if MODTYPE==PSEUDO_MERSENNE || MODTYPE==GENERALISED_MERSENNE {
 		y:=F.fpow()
 		if MOD8==5 {
 			t:=NewFPcopy(F)
 			t.sqr()
-			F.mul(t)
+			F.Mul(t)
 			y.sqr()
 		} 
 		y.sqr()
 		y.sqr()
-		F.mul(y)		
+		F.Mul(y)
 	} else {
 		m2:=NewBIGints(Modulus)
 		m2.dec(2); m2.norm()
-		F.copy(F.pow(m2))
+		F.copy(F.Pow(m2))
 	}
 
 }
@@ -468,7 +468,7 @@ func (F *FP) Equals(a *FP) bool {
 }
 
 
-func (F *FP) pow(e *BIG) *FP {
+func (F *FP) Pow(e *BIG) *FP {
 	var tb []*FP
 	var w [1+(NLEN*int(BASEBITS)+3)/4]int8	
 	F.norm()
@@ -487,7 +487,7 @@ func (F *FP) pow(e *BIG) *FP {
 	tb=append(tb,NewFPcopy(F))
 	for i:=2;i<16;i++ {
 		tb=append(tb,NewFPcopy(tb[i-1]))
-		tb[i].mul(F);
+		tb[i].Mul(F);
 	}
 	r:=NewFPcopy(tb[w[nb-1]])
 	for i:=nb-2;i>=0;i-- {
@@ -495,7 +495,7 @@ func (F *FP) pow(e *BIG) *FP {
 		r.sqr()
 		r.sqr()
 		r.sqr()
-		r.mul(tb[w[i]])
+		r.Mul(tb[w[i]])
 	}
 	r.reduce()
 	return r
@@ -512,24 +512,24 @@ func (F *FP) sqrt() *FP {
 		} else {
 			b:=NewBIGints(Modulus);
 			b.dec(5); b.norm(); b.shr(3)
-			v=i.pow(b)
+			v=i.Pow(b)
 		}
 
-		i.mul(v); i.mul(v)
+		i.Mul(v); i.Mul(v)
 		i.x.dec(1)
 		r:=NewFPcopy(F)
-		r.mul(v); r.mul(i) 
+		r.Mul(v); r.Mul(i)
 		r.reduce()
 		return r
 	} else {
 		var r *FP
 		if MODTYPE==PSEUDO_MERSENNE || MODTYPE==GENERALISED_MERSENNE {
 			r=F.fpow()
-			r.mul(F)
+			r.Mul(F)
 		} else {
 			b:=NewBIGints(Modulus);
 			b.inc(1); b.norm(); b.shr(2)
-			r=F.pow(b)
+			r=F.Pow(b)
 		}
 		return r
 	}

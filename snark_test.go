@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/arnaucube/go-snark/circuitcompiler"
-	"github.com/arnaucube/go-snark/r1csqap"
+	"github.com/paulgoleary/go-snark/circuitcompiler"
+	"github.com/paulgoleary/go-snark/r1csqap"
 	"github.com/stretchr/testify/assert"
 )
 

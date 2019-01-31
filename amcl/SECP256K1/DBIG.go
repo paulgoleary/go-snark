@@ -98,14 +98,14 @@ func dcomp(a *DBIG,b *DBIG) int {
 	return 0
 }
 
-/* Copy from another DBIG */
+/* copy from another DBIG */
 func (r *DBIG) copy(x *DBIG) {
 	for i:=0;i<DNLEN;i++ {
 		r.w[i]=x.w[i]
 	}
 }
 
-/* Copy from another BIG to upper half */
+/* copy from another BIG to upper half */
 func (r *DBIG) ucopy(x *BIG) {
 	for i:=0;i<NLEN;i++ {
 		r.w[i]=0

@@ -93,7 +93,7 @@ func NewECPbigint(ix *BIG,s int) *ECP {
 	E.z=NewFPint(1)
 	if rhs.jacobi()==1 {
 		ny:=rhs.sqrt()
-		if ny.redc().parity()!=s {ny.neg()}
+		if ny.redc().parity()!=s {ny.Neg()}
 		E.y.copy(ny)
 	} else {E.inf()}
 	return E;
@@ -162,10 +162,10 @@ func (E *ECP) Copy(P *ECP) {
 /* this=-this */
 func (E *ECP) neg() {
 	if CURVETYPE==WEIERSTRASS {
-		E.y.neg(); E.y.norm()
+		E.y.Neg(); E.y.norm()
 	}
 	if CURVETYPE==EDWARDS {
-		E.x.neg(); E.x.norm()
+		E.x.Neg(); E.x.norm()
 	}
 	return;
 }
@@ -205,12 +205,12 @@ func (E *ECP) inf() {
 func( E *ECP) Equals(Q *ECP) bool {
 	a:=NewFPint(0)
 	b:=NewFPint(0)
-	a.copy(E.x); a.mul(Q.z); a.reduce()
-	b.copy(Q.x); b.mul(E.z); b.reduce()
+	a.copy(E.x); a.Mul(Q.z); a.reduce()
+	b.copy(Q.x); b.Mul(E.z); b.reduce()
 	if !a.Equals(b) {return false}
 	if CURVETYPE!=MONTGOMERY {
-		a.copy(E.y); a.mul(Q.z); a.reduce()
-		b.copy(Q.y); b.mul(E.z); b.reduce()
+		a.copy(E.y); a.Mul(Q.z); a.reduce()
+		b.copy(Q.y); b.Mul(E.z); b.reduce()
 		if !a.Equals(b) {return false}
 	}
 
@@ -224,34 +224,34 @@ func RHS(x *FP) *FP {
 
 	if CURVETYPE==WEIERSTRASS { // x^3+Ax+B
 		b:=NewFPbig(NewBIGints(CURVE_B))
-		r.mul(x);
+		r.Mul(x);
 		if CURVE_A==-3 {
 			cx:=NewFPcopy(x)
 			cx.imul(3)
-			cx.neg(); cx.norm()
-			r.add(cx)
+			cx.Neg(); cx.norm()
+			r.Add(cx)
 		}
-		r.add(b)
+		r.Add(b)
 	}
 	if CURVETYPE==EDWARDS { // (Ax^2-1)/(Bx^2-1) 
 		b:=NewFPbig(NewBIGints(CURVE_B))
 
 		one:=NewFPint(1)
-		b.mul(r)
-		b.sub(one)
+		b.Mul(r)
+		b.Sub(one)
 		b.norm()
-		if CURVE_A==-1 {r.neg()}
-		r.sub(one); r.norm()
-		b.inverse()
-		r.mul(b)
+		if CURVE_A==-1 {r.Neg()}
+		r.Sub(one); r.norm()
+		b.Inverse()
+		r.Mul(b)
 	}
 	if CURVETYPE==MONTGOMERY { // x^3+Ax^2+x
 		x3:=NewFPint(0)
 		x3.copy(r)
-		x3.mul(x)
+		x3.Mul(x)
 		r.imul(CURVE_A)
-		r.add(x3)
-		r.add(x)
+		r.Add(x3)
+		r.Add(x)
 	}
 	r.reduce()
 	return r
@@ -262,11 +262,11 @@ func (E *ECP) Affine() {
 	if E.Is_infinity() {return}
 	one:=NewFPint(1)
 	if E.z.Equals(one) {return}
-	E.z.inverse()
-	E.x.mul(E.z); E.x.reduce()
+	E.z.Inverse()
+	E.x.Mul(E.z); E.x.reduce()
 
 	if CURVETYPE!=MONTGOMERY {
-		E.y.mul(E.z); E.y.reduce()
+		E.y.Mul(E.z); E.y.reduce()
 	}
 	E.z.copy(one)
 }
@@ -374,25 +374,25 @@ func (E *ECP) dbl() {
 			t0:=NewFPcopy(E.y)             
 			t0.sqr()
 			t1:=NewFPcopy(E.y)
-			t1.mul(E.z)
+			t1.Mul(E.z)
 			t2:=NewFPcopy(E.z)
 			t2.sqr()
 
 			E.z.copy(t0)
-			E.z.add(t0); E.z.norm(); 
-			E.z.add(E.z); E.z.add(E.z); E.z.norm()
+			E.z.Add(t0); E.z.norm();
+			E.z.Add(E.z); E.z.Add(E.z); E.z.norm()
 			t2.imul(3*CURVE_B_I)
 
 			x3:=NewFPcopy(t2)
-			x3.mul(E.z)
+			x3.Mul(E.z)
 
 			y3:=NewFPcopy(t0)
-			y3.add(t2); y3.norm()
-			E.z.mul(t1)
-			t1.copy(t2); t1.add(t2); t2.add(t1)
-			t0.sub(t2); t0.norm(); y3.mul(t0); y3.add(x3)
-			t1.copy(E.x); t1.mul(E.y) 
-			E.x.copy(t0); E.x.norm(); E.x.mul(t1); E.x.add(E.x)
+			y3.Add(t2); y3.norm()
+			E.z.Mul(t1)
+			t1.copy(t2); t1.Add(t2); t2.Add(t1)
+			t0.Sub(t2); t0.norm(); y3.Mul(t0); y3.Add(x3)
+			t1.copy(E.x); t1.Mul(E.y)
+			E.x.copy(t0); E.x.norm(); E.x.Mul(t1); E.x.Add(E.x)
 			E.x.norm(); 
 			E.y.copy(y3); E.y.norm();
 		} else {
@@ -411,55 +411,55 @@ func (E *ECP) dbl() {
 			t1.sqr()  //2    y^2
 			t2.sqr()  //3
 
-			t3.mul(E.y) //4
-			t3.add(t3); t3.norm() //5
-			z3.mul(E.x);   //6
-			z3.add(z3);  z3.norm()//7
-			y3.copy(t2) 
+			t3.Mul(E.y)            //4
+			t3.Add(t3); t3.norm()  //5
+			z3.Mul(E.x);           //6
+			z3.Add(z3);  z3.norm() //7
+			y3.copy(t2)
 				
 			if CURVE_B_I==0 {
-				y3.mul(b)
+				y3.Mul(b)
 			} else {
 				y3.imul(CURVE_B_I)
 			}
 				
-			y3.sub(z3) //9  ***
-			x3.copy(y3); x3.add(y3); x3.norm() //10
+			y3.Sub(z3)                         //9  ***
+			x3.copy(y3); x3.Add(y3); x3.norm() //10
 
-			y3.add(x3) //11
-			x3.copy(t1); x3.sub(y3); x3.norm() //12
-			y3.add(t1); y3.norm() //13
-			y3.mul(x3)  //14
-			x3.mul(t3)  //15
-			t3.copy(t2); t3.add(t2)   //16
-			t2.add(t3)   //17
+			y3.Add(x3)                         //11
+			x3.copy(t1); x3.Sub(y3); x3.norm() //12
+			y3.Add(t1); y3.norm()              //13
+			y3.Mul(x3)                         //14
+			x3.Mul(t3)                         //15
+			t3.copy(t2); t3.Add(t2)            //16
+			t2.Add(t3)                         //17
 
 			if CURVE_B_I==0 {
-				z3.mul(b)
+				z3.Mul(b)
 			} else {
 				z3.imul(CURVE_B_I)
 			}
 
-			z3.sub(t2) //19
-			z3.sub(t0); z3.norm()//20  ***
-			t3.copy(z3); t3.add(z3) //21
+			z3.Sub(t2)              //19
+			z3.Sub(t0); z3.norm()   //20  ***
+			t3.copy(z3); t3.Add(z3) //21
 
-			z3.add(t3); z3.norm()  //22
-			t3.copy(t0); t3.add(t0)   //23
-			t0.add(t3)  //24
-			t0.sub(t2); t0.norm() //25
+			z3.Add(t3); z3.norm()   //22
+			t3.copy(t0); t3.Add(t0) //23
+			t0.Add(t3)              //24
+			t0.Sub(t2); t0.norm()   //25
 
-			t0.mul(z3) //26
-			y3.add(t0) //27
-			t0.copy(E.y); t0.mul(E.z)//28
-			t0.add(t0); t0.norm() //29
-			z3.mul(t0)//30
-			x3.sub(z3) //x3.norm();//31
-			t0.add(t0); t0.norm() //32
-			t1.add(t1); t1.norm() //33
-			z3.copy(t0); z3.mul(t1) //34
+			t0.Mul(z3)                //26
+			y3.Add(t0)                //27
+			t0.copy(E.y); t0.Mul(E.z) //28
+			t0.Add(t0); t0.norm()     //29
+			z3.Mul(t0)                //30
+			x3.Sub(z3)                //x3.norm();//31
+			t0.Add(t0); t0.norm()     //32
+			t1.Add(t1); t1.norm()     //33
+			z3.copy(t0); z3.Mul(t1)   //34
 
-			E.x.copy(x3); E.x.norm() 
+			E.x.copy(x3); E.x.norm()
 			E.y.copy(y3); E.y.norm()
 			E.z.copy(z3); E.z.norm()
 		}
@@ -471,19 +471,19 @@ func (E *ECP) dbl() {
 		H:=NewFPcopy(E.z)
 		J:=NewFPint(0)
 	
-		E.x.mul(E.y); E.x.add(E.x); E.x.norm()
+		E.x.Mul(E.y); E.x.Add(E.x); E.x.norm()
 		C.sqr()
 		D.sqr()
-		if CURVE_A==-1 {C.neg()}	
-		E.y.copy(C); E.y.add(D); E.y.norm()
+		if CURVE_A==-1 {C.Neg()}
+		E.y.copy(C); E.y.Add(D); E.y.norm()
 
-		H.sqr(); H.add(H)
+		H.sqr(); H.Add(H)
 		E.z.copy(E.y)
-		J.copy(E.y); J.sub(H); J.norm()
-		E.x.mul(J)
-		C.sub(D); C.norm()
-		E.y.mul(C)
-		E.z.mul(J)
+		J.copy(E.y); J.Sub(H); J.norm()
+		E.x.Mul(J)
+		C.Sub(D); C.norm()
+		E.y.Mul(C)
+		E.z.Mul(J)
 
 
 	}
@@ -494,19 +494,19 @@ func (E *ECP) dbl() {
 		BB:=NewFPint(0)
 		C:=NewFPint(0)
 
-		A.add(E.z); A.norm()
+		A.Add(E.z); A.norm()
 		AA.copy(A); AA.sqr()
-		B.sub(E.z); B.norm()
+		B.Sub(E.z); B.norm()
 		BB.copy(B); BB.sqr()
-		C.copy(AA); C.sub(BB)
+		C.copy(AA); C.Sub(BB)
 		C.norm()
 
-		E.x.copy(AA); E.x.mul(BB)
+		E.x.copy(AA); E.x.Mul(BB)
 
 		A.copy(C); A.imul((CURVE_A+2)/4)
 
-		BB.add(A); BB.norm()
-		E.z.copy(BB); E.z.mul(C)
+		BB.Add(A); BB.norm()
+		E.z.copy(BB); E.z.Mul(C)
 	}
 	return;
 }
@@ -518,51 +518,51 @@ func (E *ECP) Add(Q *ECP) {
 		if CURVE_A==0 {
 			b:=3*CURVE_B_I
 			t0:=NewFPcopy(E.x)
-			t0.mul(Q.x)
+			t0.Mul(Q.x)
 			t1:=NewFPcopy(E.y)
-			t1.mul(Q.y)
+			t1.Mul(Q.y)
 			t2:=NewFPcopy(E.z)
-			t2.mul(Q.z)
+			t2.Mul(Q.z)
 			t3:=NewFPcopy(E.x)
-			t3.add(E.y); t3.norm()
+			t3.Add(E.y); t3.norm()
 			t4:=NewFPcopy(Q.x)
-			t4.add(Q.y); t4.norm()
-			t3.mul(t4)
-			t4.copy(t0); t4.add(t1)
+			t4.Add(Q.y); t4.norm()
+			t3.Mul(t4)
+			t4.copy(t0); t4.Add(t1)
 
-			t3.sub(t4); t3.norm()
+			t3.Sub(t4); t3.norm()
 			t4.copy(E.y)
-			t4.add(E.z); t4.norm()
+			t4.Add(E.z); t4.norm()
 			x3:=NewFPcopy(Q.y)
-			x3.add(Q.z); x3.norm()
+			x3.Add(Q.z); x3.norm()
 
-			t4.mul(x3)
+			t4.Mul(x3)
 			x3.copy(t1)
-			x3.add(t2)
+			x3.Add(t2)
 	
-			t4.sub(x3); t4.norm()
-			x3.copy(E.x); x3.add(E.z); x3.norm()
+			t4.Sub(x3); t4.norm()
+			x3.copy(E.x); x3.Add(E.z); x3.norm()
 			y3:=NewFPcopy(Q.x)
-			y3.add(Q.z); y3.norm()
-			x3.mul(y3)
+			y3.Add(Q.z); y3.norm()
+			x3.Mul(y3)
 			y3.copy(t0)
-			y3.add(t2)
+			y3.Add(t2)
 			y3.rsub(x3); y3.norm()
-			x3.copy(t0); x3.add(t0) 
-			t0.add(x3); t0.norm()
+			x3.copy(t0); x3.Add(t0)
+			t0.Add(x3); t0.norm()
 			t2.imul(b)
 
-			z3:=NewFPcopy(t1); z3.add(t2); z3.norm()
-			t1.sub(t2); t1.norm() 
+			z3:=NewFPcopy(t1); z3.Add(t2); z3.norm()
+			t1.Sub(t2); t1.norm()
 			y3.imul(b)
 	
-			x3.copy(y3); x3.mul(t4); t2.copy(t3); t2.mul(t1); x3.rsub(t2)
-			y3.mul(t0); t1.mul(z3); y3.add(t1)
-			t0.mul(t3); z3.mul(t4); z3.add(t0)
+			x3.copy(y3); x3.Mul(t4); t2.copy(t3); t2.Mul(t1); x3.rsub(t2)
+			y3.Mul(t0); t1.Mul(z3); y3.Add(t1)
+			t0.Mul(t3); z3.Mul(t4); z3.Add(t0)
 
 			E.x.copy(x3); E.x.norm()
 			E.y.copy(y3); E.y.norm()
-			E.z.copy(z3); E.z.norm()	
+			E.z.copy(z3); E.z.norm()
 		} else {
 
 			t0:=NewFPcopy(E.x)
@@ -577,71 +577,71 @@ func (E *ECP) Add(Q *ECP) {
 
 			if CURVE_B_I==0 {b.copy(NewFPbig(NewBIGints(CURVE_B)))}
 
-			t0.mul(Q.x) //1
-			t1.mul(Q.y) //2
-			t2.mul(Q.z) //3
+			t0.Mul(Q.x) //1
+			t1.Mul(Q.y) //2
+			t2.Mul(Q.z) //3
 
-			t3.add(E.y); t3.norm() //4
-			t4.add(Q.y); t4.norm() //5
-			t3.mul(t4) //6
-			t4.copy(t0); t4.add(t1)  //7
-			t3.sub(t4); t3.norm() //8
-			t4.copy(E.y); t4.add(E.z); t4.norm() //9
-			x3.add(Q.z); x3.norm() //10
-			t4.mul(x3) //11
-			x3.copy(t1); x3.add(t2) //12
+			t3.Add(E.y); t3.norm()               //4
+			t4.Add(Q.y); t4.norm()               //5
+			t3.Mul(t4)                           //6
+			t4.copy(t0); t4.Add(t1)              //7
+			t3.Sub(t4); t3.norm()                //8
+			t4.copy(E.y); t4.Add(E.z); t4.norm() //9
+			x3.Add(Q.z); x3.norm()               //10
+			t4.Mul(x3)                           //11
+			x3.copy(t1); x3.Add(t2)              //12
 
-			t4.sub(x3); t4.norm() //13
-			x3.copy(E.x); x3.add(E.z); x3.norm() //14
-			y3.add(Q.z); y3.norm() //15
+			t4.Sub(x3); t4.norm()                //13
+			x3.copy(E.x); x3.Add(E.z); x3.norm() //14
+			y3.Add(Q.z); y3.norm()               //15
 
-			x3.mul(y3) //16
-			y3.copy(t0); y3.add(t2) //17
+			x3.Mul(y3)              //16
+			y3.copy(t0); y3.Add(t2) //17
 
 			y3.rsub(x3); y3.norm() //18
-			z3.copy(t2) 
+			z3.copy(t2)
 				
 			if CURVE_B_I==0 {
-				z3.mul(b)
+				z3.Mul(b)
 			} else {
 				z3.imul(CURVE_B_I)
 			}
 				
-			x3.copy(y3); x3.sub(z3); x3.norm() //20
-			z3.copy(x3); z3.add(x3)  //21
+			x3.copy(y3); x3.Sub(z3); x3.norm() //20
+			z3.copy(x3); z3.Add(x3)            //21
 
-			x3.add(z3)  //22
-			z3.copy(t1); z3.sub(x3); z3.norm() //23
-			x3.add(t1); x3.norm() //24
+			x3.Add(z3)                         //22
+			z3.copy(t1); z3.Sub(x3); z3.norm() //23
+			x3.Add(t1); x3.norm()              //24
 
 			if CURVE_B_I==0 {
-				y3.mul(b)
+				y3.Mul(b)
 			} else {
 				y3.imul(CURVE_B_I)
 			}
 
-			t1.copy(t2); t1.add(t2); //26
-			t2.add(t1) //27
+			t1.copy(t2); t1.Add(t2); //26
+			t2.Add(t1)               //27
 
-			y3.sub(t2)  //28
+			y3.Sub(t2) //28
 
-			y3.sub(t0); y3.norm() //29
-			t1.copy(y3); t1.add(y3) //30
-			y3.add(t1); y3.norm() //31
+			y3.Sub(t0); y3.norm()   //29
+			t1.copy(y3); t1.Add(y3) //30
+			y3.Add(t1); y3.norm()   //31
 
-			t1.copy(t0); t1.add(t0)  //32
-			t0.add(t1) //33
-			t0.sub(t2); t0.norm() //34
-			t1.copy(t4); t1.mul(y3) //35
-			t2.copy(t0); t2.mul(y3) //36
-			y3.copy(x3); y3.mul(z3) //37
-			y3.add(t2) //38
-			x3.mul(t3) //39
-			x3.sub(t1) //40
-			z3.mul(t4) //41
-			t1.copy(t3); t1.mul(t0) //42
-			z3.add(t1) 
-			E.x.copy(x3); E.x.norm() 
+			t1.copy(t0); t1.Add(t0) //32
+			t0.Add(t1)              //33
+			t0.Sub(t2); t0.norm()   //34
+			t1.copy(t4); t1.Mul(y3) //35
+			t2.copy(t0); t2.Mul(y3) //36
+			y3.copy(x3); y3.Mul(z3) //37
+			y3.Add(t2)              //38
+			x3.Mul(t3)              //39
+			x3.Sub(t1)              //40
+			z3.Mul(t4)              //41
+			t1.copy(t3); t1.Mul(t0) //42
+			z3.Add(t1)
+			E.x.copy(x3); E.x.norm()
 			E.y.copy(y3); E.y.norm()
 			E.z.copy(z3); E.z.norm()
 
@@ -657,37 +657,37 @@ func (E *ECP) Add(Q *ECP) {
 		F:=NewFPint(0)
 		G:=NewFPint(0)
 	
-		A.mul(Q.z);
+		A.Mul(Q.z);
 		B.copy(A); B.sqr()
-		C.mul(Q.x)
-		D.mul(Q.y)
+		C.Mul(Q.x)
+		D.Mul(Q.y)
 
-		EE.copy(C); EE.mul(D); EE.mul(b)
-		F.copy(B); F.sub(EE)
-		G.copy(B); G.add(EE)
+		EE.copy(C); EE.Mul(D); EE.Mul(b)
+		F.copy(B); F.Sub(EE)
+		G.copy(B); G.Add(EE)
 
 		if CURVE_A==1 {
-			EE.copy(D); EE.sub(C)
+			EE.copy(D); EE.Sub(C)
 		}
-		C.add(D)
+		C.Add(D)
 
-		B.copy(E.x); B.add(E.y)
-		D.copy(Q.x); D.add(Q.y)
+		B.copy(E.x); B.Add(E.y)
+		D.copy(Q.x); D.Add(Q.y)
 		B.norm(); D.norm()
-		B.mul(D)
-		B.sub(C)
+		B.Mul(D)
+		B.Sub(C)
 		B.norm(); F.norm()
-		B.mul(F)
-		E.x.copy(A); E.x.mul(B)
+		B.Mul(F)
+		E.x.copy(A); E.x.Mul(B)
 		G.norm()
 		if CURVE_A==1 {
-			EE.norm(); C.copy(EE); C.mul(G)
+			EE.norm(); C.copy(EE); C.Mul(G)
 		}
 		if CURVE_A==-1 {
-			C.norm(); C.mul(G)
+			C.norm(); C.Mul(G)
 		}
-		E.y.copy(A); E.y.mul(C)
-		E.z.copy(F); E.z.mul(G)
+		E.y.copy(A); E.y.Mul(C)
+		E.z.copy(F); E.z.Mul(G)
 	}
 	return
 }
@@ -701,23 +701,23 @@ func (E *ECP) dadd(Q *ECP,W *ECP) {
 	DA:=NewFPint(0)
 	CB:=NewFPint(0)
 			
-	A.add(E.z)
-	B.sub(E.z)
+	A.Add(E.z)
+	B.Sub(E.z)
 
-	C.add(Q.z)
-	D.sub(Q.z)
+	C.Add(Q.z)
+	D.Sub(Q.z)
 	A.norm(); D.norm()
 
-	DA.copy(D); DA.mul(A)
+	DA.copy(D); DA.Mul(A)
 	C.norm(); B.norm()
 
-	CB.copy(C); CB.mul(B)
+	CB.copy(C); CB.Mul(B)
 
-	A.copy(DA); A.add(CB); A.norm(); A.sqr()
-	B.copy(DA); B.sub(CB); B.norm(); B.sqr()
+	A.copy(DA); A.Add(CB); A.norm(); A.sqr()
+	B.copy(DA); B.Sub(CB); B.norm(); B.sqr()
 
 	E.x.copy(A)
-	E.z.copy(W.x); E.z.mul(B)
+	E.z.copy(W.x); E.z.Mul(B)
 
 }
 
@@ -797,7 +797,7 @@ func (E *ECP) mul(e *BIG) *ECP {
 			W[i].Add(Q)
 		}
 
-// make exponent odd - add 2P if even, P if odd 
+// make exponent odd - Add 2P if even, P if odd
 		t.copy(e)
 		s:=int(t.parity())
 		t.inc(1); t.norm(); ns:=int(t.parity()); mt.copy(t); mt.inc(1); mt.norm()
@@ -865,7 +865,7 @@ func (E *ECP) Mul2(e *BIG,Q *ECP,f *BIG) *ECP {
 	W[4].Copy(W[5]); W[4].Sub(S);
 	W[7].Copy(W[6]); W[7].Add(S);
 
-// if multiplier is odd, add 2, else add 1 to multiplier, and add 2P or P to correction 
+// if multiplier is odd, Add 2, else Add 1 to multiplier, and Add 2P or P to correction
 
 	s:=int(te.parity());
 	te.inc(1); te.norm(); ns:=int(te.parity()); mt.copy(te); mt.inc(1); mt.norm()

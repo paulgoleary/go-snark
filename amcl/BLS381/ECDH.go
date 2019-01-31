@@ -21,8 +21,9 @@ under the License.
 
 package BLS381
 
+import "github.com/paulgoleary/go-snark/amcl"
+
 //import "fmt"
-import "github.com/qluvio/elv-master/crypto/amcl"
 
 const INVALID_PUBLIC_KEY int=-2
 const ERROR int=-3

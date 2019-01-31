@@ -21,8 +21,10 @@ under the License.
 
 package BLS381
 
-import "strconv"
-import "github.com/qluvio/elv-master/crypto/amcl"
+import (
+	"github.com/paulgoleary/go-snark/amcl"
+	"strconv"
+)
 
 //import "fmt"
 
@@ -257,14 +259,14 @@ func (r *BIG) one() {
 	}
 }
 
-/* Copy from another BIG */
+/* copy from another BIG */
 func (r *BIG) copy(x *BIG) {
 	for i:=0;i<NLEN;i++ {
 		r.w[i]=x.w[i]
 	}
 }
 
-/* Copy from another DBIG */
+/* copy from another DBIG */
 func (r *BIG) dcopy(x *DBIG) {
 	for i:=0;i<NLEN;i++ {
 		r.w[i]=x.w[i]

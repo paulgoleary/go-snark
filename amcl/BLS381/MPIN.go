@@ -21,8 +21,10 @@ under the License.
 
 package BLS381
 
-import "time"
-import "github.com/qluvio/elv-master/crypto/amcl"
+import (
+	"github.com/paulgoleary/go-snark/amcl"
+	"time"
+)
 
 //import "fmt"
 

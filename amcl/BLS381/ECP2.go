@@ -286,7 +286,7 @@ func (E *ECP2) dbl() int {
 	return 1
 }
 
-/* this+=Q - return 0 for add, 1 for double, -1 for O */
+/* this+=Q - return 0 for Add, 1 for double, -1 for O */
 func (E *ECP2) Add(Q *ECP2) int {
 	b:=3*CURVE_B_I
 	t0:=NewFP2copy(E.x)
@@ -403,7 +403,7 @@ func (E *ECP2) mul(e *BIG) *ECP2 {
 		W[i].Add(Q)
 	}
 
-/* make exponent odd - add 2P if even, P if odd */
+/* make exponent odd - Add 2P if even, P if odd */
 	t.copy(e)
 	s:=int(t.parity())
 	t.inc(1); t.norm(); ns:=int(t.parity()); mt.copy(t); mt.inc(1); mt.norm()

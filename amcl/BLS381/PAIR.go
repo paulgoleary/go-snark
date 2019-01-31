@@ -532,7 +532,7 @@ func G1mul(P *ECP,e *BIG) *ECP {
 		cru:=NewFPbig(NewBIGints(CURVE_Cru))
 		t:=NewBIGint(0)
 		u:=glv(e)
-		Q.getx().mul(cru)
+		Q.getx().Mul(cru)
 
 		np:=u[0].nbits()
 		t.copy(Modneg(u[0],q))

@@ -1,18 +1,16 @@
 package r1csqap
 
 import (
-	"bytes"
 	"fmt"
-	"math/big"
-
-	"github.com/arnaucube/go-snark/fields"
+	"github.com/paulgoleary/go-snark/amcl/BLS381"
+	"github.com/paulgoleary/go-snark/fields"
 )
 
 // Transpose transposes the *big.Int matrix
-func Transpose(matrix [][]*big.Int) [][]*big.Int {
-	var r [][]*big.Int
+func Transpose(matrix [][]*BLS381.FP) [][]*BLS381.FP {
+	var r [][]*BLS381.FP
 	for i := 0; i < len(matrix[0]); i++ {
-		var row []*big.Int
+		var row []*BLS381.FP
 		for j := 0; j < len(matrix); j++ {
 			row = append(row, matrix[j][i])
 		}
@@ -21,21 +19,22 @@ func Transpose(matrix [][]*big.Int) [][]*big.Int {
 	return r
 }
 
-// ArrayOfBigZeros creates a *big.Int array with n elements to zero
-func ArrayOfBigZeros(num int) []*big.Int {
-	bigZero := big.NewInt(int64(0))
-	var r []*big.Int
+// ArrayOfBigZeros creates a *BLS381.FP array with n elements to zero
+func ArrayOfBigZeros(num int) []*BLS381.FP {
+	blsZero := BLS381.NewFPint(0)
+	var r []*BLS381.FP
 	for i := 0; i < num; i++ {
-		r = append(r, bigZero)
+		r = append(r, blsZero)
 	}
 	return r
 }
-func BigArraysEqual(a, b []*big.Int) bool {
+
+func BigArraysEqual(a, b []*BLS381.FP) bool {
 	if len(a) != len(b) {
 		return false
 	}
 	for i := 0; i < len(a); i++ {
-		if !bytes.Equal(a[i].Bytes(), b[i].Bytes()) {
+		if !a[i].Equals(b[i]) {
 			return false
 		}
 	}
@@ -55,7 +54,7 @@ func NewPolynomialField(f fields.Fq) PolynomialField {
 }
 
 // Mul multiplies two polinomials over the Finite Field
-func (pf PolynomialField) Mul(a, b []*big.Int) []*big.Int {
+func (pf PolynomialField) Mul(a, b []*BLS381.FP) []*BLS381.FP {
 	r := ArrayOfBigZeros(len(a) + len(b) - 1)
 	for i := 0; i < len(a); i++ {
 		for j := 0; j < len(b); j++ {
@@ -68,7 +67,7 @@ func (pf PolynomialField) Mul(a, b []*big.Int) []*big.Int {
 }
 
 // Div divides two polinomials over the Finite Field, returning the result and the remainder
-func (pf PolynomialField) Div(a, b []*big.Int) ([]*big.Int, []*big.Int) {
+func (pf PolynomialField) Div(a, b []*BLS381.FP) ([]*BLS381.FP, []*BLS381.FP) {
 	// https://en.wikipedia.org/wiki/Division_algorithm
 	r := ArrayOfBigZeros(len(a) - len(b) + 1)
 	rem := a
@@ -91,8 +90,8 @@ func max(a, b int) int {
 	return b
 }
 
-// Add adds two polinomials over the Finite Field
-func (pf PolynomialField) Add(a, b []*big.Int) []*big.Int {
+// Add adds two polynomials over the Finite Field
+func (pf PolynomialField) Add(a, b []*BLS381.FP) []*BLS381.FP {
 	r := ArrayOfBigZeros(max(len(a), len(b)))
 	for i := 0; i < len(a); i++ {
 		r[i] = pf.F.Add(r[i], a[i])
@@ -104,7 +103,7 @@ func (pf PolynomialField) Add(a, b []*big.Int) []*big.Int {
 }
 
 // Sub subtracts two polinomials over the Finite Field
-func (pf PolynomialField) Sub(a, b []*big.Int) []*big.Int {
+func (pf PolynomialField) Sub(a, b []*BLS381.FP) []*BLS381.FP {
 	r := ArrayOfBigZeros(max(len(a), len(b)))
 	for i := 0; i < len(a); i++ {
 		r[i] = pf.F.Add(r[i], a[i])
@@ -116,10 +115,10 @@ func (pf PolynomialField) Sub(a, b []*big.Int) []*big.Int {
 }
 
 // Eval evaluates the polinomial over the Finite Field at the given value x
-func (pf PolynomialField) Eval(v []*big.Int, x *big.Int) *big.Int {
-	r := big.NewInt(int64(0))
+func (pf PolynomialField) Eval(v []*BLS381.FP, x *BLS381.FP) *BLS381.FP {
+	r := BLS381.NewFPint(0)
 	for i := 0; i < len(v); i++ {
-		xi := pf.F.Exp(x, big.NewInt(int64(i)))
+		xi := pf.F.Exp(x, BLS381.NewBIGint(i))
 		elem := pf.F.Mul(v[i], xi)
 		r = pf.F.Add(r, elem)
 		println(fmt.Sprintf("%v", r))
@@ -128,30 +127,30 @@ func (pf PolynomialField) Eval(v []*big.Int, x *big.Int) *big.Int {
 }
 
 // NewPolZeroAt generates a new polynomial that has value zero at the given value
-func (pf PolynomialField) NewPolZeroAt(pointPos, totalPoints int, height *big.Int) []*big.Int {
+func (pf PolynomialField) NewPolZeroAt(pointPos, totalPoints int, height *BLS381.FP) []*BLS381.FP {
 	fac := 1
 	for i := 1; i < totalPoints+1; i++ {
 		if i != pointPos {
 			fac = fac * (pointPos - i)
 		}
 	}
-	facBig := big.NewInt(int64(fac))
-	hf := pf.F.Div(height, facBig)
-	r := []*big.Int{hf}
+	facBls := BLS381.NewFPint(fac)
+	hf := pf.F.Div(height, facBls)
+	r := []*BLS381.FP{hf}
 	for i := 1; i < totalPoints+1; i++ {
 		if i != pointPos {
-			ineg := big.NewInt(int64(-i))
-			b1 := big.NewInt(int64(1))
-			r = pf.Mul(r, []*big.Int{ineg, b1})
+			ineg := BLS381.NewFPint(-i)
+			b1 := BLS381.NewFPint(1)
+			r = pf.Mul(r, []*BLS381.FP{ineg, b1})
 		}
 	}
 	return r
 }
 
 // LagrangeInterpolation performs the Lagrange Interpolation / Lagrange Polynomials operation
-func (pf PolynomialField) LagrangeInterpolation(v []*big.Int) []*big.Int {
+func (pf PolynomialField) LagrangeInterpolation(v []*BLS381.FP) []*BLS381.FP {
 	// https://en.wikipedia.org/wiki/Lagrange_polynomial
-	var r []*big.Int
+	var r []*BLS381.FP
 	for i := 0; i < len(v); i++ {
 		r = pf.Add(r, pf.NewPolZeroAt(i+1, len(v), v[i]))
 	}
@@ -160,46 +159,46 @@ func (pf PolynomialField) LagrangeInterpolation(v []*big.Int) []*big.Int {
 }
 
 // R1CSToQAP converts the R1CS values to the QAP values
-func (pf PolynomialField) R1CSToQAP(a, b, c [][]*big.Int) ([][]*big.Int, [][]*big.Int, [][]*big.Int, []*big.Int) {
+func (pf PolynomialField) R1CSToQAP(a, b, c [][]*BLS381.FP) ([][]*BLS381.FP, [][]*BLS381.FP, [][]*BLS381.FP, []*BLS381.FP) {
 	aT := Transpose(a)
 	bT := Transpose(b)
 	cT := Transpose(c)
-	var alphas [][]*big.Int
+	var alphas [][]*BLS381.FP
 	for i := 0; i < len(aT); i++ {
 		alphas = append(alphas, pf.LagrangeInterpolation(aT[i]))
 	}
-	var betas [][]*big.Int
+	var betas [][]*BLS381.FP
 	for i := 0; i < len(bT); i++ {
 		betas = append(betas, pf.LagrangeInterpolation(bT[i]))
 	}
-	var gammas [][]*big.Int
+	var gammas [][]*BLS381.FP
 	for i := 0; i < len(cT); i++ {
 		gammas = append(gammas, pf.LagrangeInterpolation(cT[i]))
 	}
-	z := []*big.Int{big.NewInt(int64(1))}
+	z := []*BLS381.FP{BLS381.NewFPint(1)}
 	for i := 1; i < len(aT[0])+1; i++ {
-		ineg := big.NewInt(int64(-i))
-		b1 := big.NewInt(int64(1))
-		z = pf.Mul(z, []*big.Int{ineg, b1})
+		ineg := BLS381.NewFPint(-i)
+		b1 := BLS381.NewFPint(1)
+		z = pf.Mul(z, []*BLS381.FP{ineg, b1})
 	}
 	return alphas, betas, gammas, z
 }
 
 // CombinePolynomials combine the given polynomials arrays into one, also returns the P(x)
-func (pf PolynomialField) CombinePolynomials(r []*big.Int, ap, bp, cp [][]*big.Int) ([]*big.Int, []*big.Int, []*big.Int, []*big.Int) {
-	var alpha []*big.Int
+func (pf PolynomialField) CombinePolynomials(r []*BLS381.FP, ap, bp, cp [][]*BLS381.FP) ([]*BLS381.FP, []*BLS381.FP, []*BLS381.FP, []*BLS381.FP) {
+	var alpha []*BLS381.FP
 	for i := 0; i < len(r); i++ {
-		m := pf.Mul([]*big.Int{r[i]}, ap[i])
+		m := pf.Mul([]*BLS381.FP{r[i]}, ap[i])
 		alpha = pf.Add(alpha, m)
 	}
-	var beta []*big.Int
+	var beta []*BLS381.FP
 	for i := 0; i < len(r); i++ {
-		m := pf.Mul([]*big.Int{r[i]}, bp[i])
+		m := pf.Mul([]*BLS381.FP{r[i]}, bp[i])
 		beta = pf.Add(beta, m)
 	}
-	var gamma []*big.Int
+	var gamma []*BLS381.FP
 	for i := 0; i < len(r); i++ {
-		m := pf.Mul([]*big.Int{r[i]}, cp[i])
+		m := pf.Mul([]*BLS381.FP{r[i]}, cp[i])
 		gamma = pf.Add(gamma, m)
 	}
 
@@ -208,7 +207,7 @@ func (pf PolynomialField) CombinePolynomials(r []*big.Int, ap, bp, cp [][]*big.I
 }
 
 // DivisorPolynomial returns the divisor polynomial given two polynomials
-func (pf PolynomialField) DivisorPolynomial(px, z []*big.Int) []*big.Int {
+func (pf PolynomialField) DivisorPolynomial(px, z []*BLS381.FP) []*BLS381.FP {
 	quo, _ := pf.Div(px, z)
 	return quo
 }

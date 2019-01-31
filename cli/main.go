@@ -11,9 +11,9 @@ import (
 	"math/big"
 	"os"
 
-	snark "github.com/arnaucube/go-snark"
-	"github.com/arnaucube/go-snark/circuitcompiler"
-	"github.com/arnaucube/go-snark/r1csqap"
+	snark "github.com/paulgoleary/go-snark"
+	"github.com/paulgoleary/go-snark/circuitcompiler"
+	"github.com/paulgoleary/go-snark/r1csqap"
 	"github.com/urfave/cli"
 )
 

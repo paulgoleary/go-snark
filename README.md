@@ -1,4 +1,4 @@
-# go-snark [![Go Report Card](https://goreportcard.com/badge/github.com/arnaucube/go-snark)](https://goreportcard.com/report/github.com/arnaucube/go-snark)
+# go-snark [![Go Report Card](https://goreportcard.com/badge/github.com/paulgoleary/go-snark)](https://goreportcard.com/report/github.com/paulgoleary/go-snark)
 
 zkSNARK library implementation in Go
 
@@ -27,11 +27,11 @@ Current implementation status:
 
 
 ## Usage
-- [![GoDoc](https://godoc.org/github.com/arnaucube/go-snark?status.svg)](https://godoc.org/github.com/arnaucube/go-snark) zkSnark
-- [![GoDoc](https://godoc.org/github.com/arnaucube/go-snark/bn128?status.svg)](https://godoc.org/github.com/arnaucube/go-snark/bn128) bn128 (more details: https://github.com/arnaucube/go-snark/tree/master/bn128)
-- [![GoDoc](https://godoc.org/github.com/arnaucube/go-snark/fields?status.svg)](https://godoc.org/github.com/arnaucube/go-snark/fields) Finite Fields operations
-- [![GoDoc](https://godoc.org/github.com/arnaucube/go-snark/r1csqap?status.svg)](https://godoc.org/github.com/arnaucube/go-snark/r1csqap) R1CS to QAP (more details: https://github.com/arnaucube/go-snark/tree/master/r1csqap)
-- [![GoDoc](https://godoc.org/github.com/arnaucube/go-snark/circuitcompiler?status.svg)](https://godoc.org/github.com/arnaucube/go-snark/circuitcompiler) Circuit Compiler
+- [![GoDoc](https://godoc.org/github.com/paulgoleary/go-snark?status.svg)](https://godoc.org/github.com/paulgoleary/go-snark) zkSnark
+- [![GoDoc](https://godoc.org/github.com/paulgoleary/go-snark/bn128?status.svg)](https://godoc.org/github.com/paulgoleary/go-snark/bn128) bn128 (more details: https://github.com/paulgoleary/go-snark/tree/master/bn128)
+- [![GoDoc](https://godoc.org/github.com/paulgoleary/go-snark/fields?status.svg)](https://godoc.org/github.com/paulgoleary/go-snark/fields) Finite Fields operations
+- [![GoDoc](https://godoc.org/github.com/paulgoleary/go-snark/r1csqap?status.svg)](https://godoc.org/github.com/paulgoleary/go-snark/r1csqap) R1CS to QAP (more details: https://github.com/paulgoleary/go-snark/tree/master/r1csqap)
+- [![GoDoc](https://godoc.org/github.com/paulgoleary/go-snark/circuitcompiler?status.svg)](https://godoc.org/github.com/paulgoleary/go-snark/circuitcompiler) Circuit Compiler
 
 ### Library usage
 Example:

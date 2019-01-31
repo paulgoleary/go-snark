@@ -1,4 +1,4 @@
-module github.com/arnaucube/go-snark
+module github.com/paulgoleary/go-snark
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
